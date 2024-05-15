@@ -23,25 +23,30 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // todo: try launching different methods
+        //viewModel.loadData()
+        viewModel.loadDataWithCoroutineExceptionHandler()
         enableEdgeToEdge()
         setContent {
             CoroutinesDemoTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = viewModel.greeting.value,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
             }
         }
     }
+
+
 }
 
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-        text = "Hello $name!",
+        text = "Hello! $name!",
         modifier = modifier
     )
 }

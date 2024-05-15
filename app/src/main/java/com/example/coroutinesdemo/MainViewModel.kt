@@ -1,6 +1,6 @@
 package com.example.coroutinesdemo
 
-import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,26 +9,29 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-
 @HiltViewModel
-class MainViewModel @Inject constructor() : ViewModel() {
+class MainViewModel @Inject constructor(
+    private val getGreetingUseCase: IGetGreetingUseCase
+) : ViewModel() {
+
+    val greeting = mutableStateOf("")
 
     fun loadData() {
         viewModelScope.launch {
             try {
-                async { throw IllegalArgumentException() }.await()
+                greeting.value = async { getGreetingUseCase() }.await()
             } catch (e: Exception) {
-                Log.e("EXAMPLE_TAG", e.message ?: "Error")
+                greeting.value = "Error occurred!"
             }
         }
     }
 
     fun loadDataWithCoroutineExceptionHandler() {
         val exceptionHandler = CoroutineExceptionHandler { _, exception ->
-            Log.e("EXAMPLE_TAG", exception.message ?: "Error")
+            greeting.value = "Error occurred!"
         }
         viewModelScope.launch(exceptionHandler) {
-            async { throw IllegalArgumentException() }.await()
+            greeting.value = async { getGreetingUseCase() }.await()
         }
     }
 }

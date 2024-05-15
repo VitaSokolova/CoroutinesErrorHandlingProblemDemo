@@ -1,42 +1,41 @@
 package com.example.coroutinesdemo
 
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.newSingleThreadContext
-import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
 
+@ExtendWith(CoroutinesTestExtension::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest {
 
-    private val mainThreadSurrogate = newSingleThreadContext("UI thread")
-
-    @Before
-    fun setUp() {
-        Dispatchers.setMain(mainThreadSurrogate)
-    }
-
-    @After
-    fun tearDown() {
-        Dispatchers.resetMain() // reset the main dispatcher to the original Main dispatcher
-        mainThreadSurrogate.close()
+    private val stubGreetingsUseCase = object : IGetGreetingUseCase {
+        override suspend fun invoke(): String {
+            delay(50L)
+            throw IllegalArgumentException()
+        }
     }
 
     @Test
     fun loadDataWithTryCatch() = runTest {
-        MainViewModel().loadData()
-        assert(true)
-    }
+        val viewModel = MainViewModel(stubGreetingsUseCase)
 
+        viewModel.loadData()
+        advanceUntilIdle()
+
+        assert(viewModel.greeting.value == "Error occurred!")
+    }
 
     @Test
     fun loadDataWithCoroutineExceptionHandler() = runTest {
-        MainViewModel().loadDataWithCoroutineExceptionHandler()
-        assert(true)
+        val viewModel = MainViewModel(stubGreetingsUseCase)
+
+        viewModel.loadDataWithCoroutineExceptionHandler()
+        advanceUntilIdle()
+
+        assert(viewModel.greeting.value == "Error occurred!")
     }
 }

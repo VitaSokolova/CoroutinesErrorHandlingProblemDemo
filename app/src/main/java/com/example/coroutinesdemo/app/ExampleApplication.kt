@@ -1,4 +1,4 @@
-package com.example.coroutinesdemo
+package com.example.coroutinesdemo.app
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
