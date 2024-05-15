@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -20,7 +21,11 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 greeting.value = async { getGreetingUseCase() }.await()
-            } catch (e: Exception) {
+            }
+            catch (e: CancellationException){
+                throw e
+            }
+            catch (e: Exception) {
                 greeting.value = "Error occurred!"
             }
         }
